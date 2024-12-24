@@ -1,5 +1,4 @@
 import sys
-import heapq
 
 N = int(input())
 count = [0]*10001

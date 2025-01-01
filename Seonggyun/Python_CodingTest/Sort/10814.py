@@ -17,5 +17,3 @@ for key in age_list:
     if length > 0:
         for name in age_dict[key]:
             print(key, name)
-            
-            

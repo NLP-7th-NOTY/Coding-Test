@@ -4,7 +4,7 @@ num_len = int(input())
 num_list = []
 
 for _ in range(num_len):
-    num_list.append(sys.stdin.readline().strip())
+    num_list.append(int(sys.stdin.readline().strip()))
     
 current_num = 1
 stack = []

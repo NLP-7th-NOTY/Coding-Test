@@ -1,0 +1,28 @@
+-- 정답 쿼리 (날짜 범위 조건 사용)
+SELECT MCDP_CD AS "진료과코드", COUNT(APNT_NO) AS "5월예약건수"
+FROM APPOINTMENT
+WHERE APNT_YMD >= '2022-05-01' AND APNT_YMD < '2022-06-01'
+GROUP BY MCDP_CD
+ORDER BY "5월예약건수", "진료과코드";
+
+-- FORMAT 활용도 가능, 그러나 날짜를 비교하거나 범위를 필터링하기에는 FORMAT은 성능이 매우 낮다.
+SELECT MCDP_CD AS "진료과코드", COUNT(APNT_NO) AS "5월예약건수"
+FROM APPOINTMENT
+WHERE FORMAT(APNT_YMD, 'yyyy-MM') = '2022-05'
+GROUP BY MCDP_CD
+ORDER BY "5월예약건수", "진료과코드";
+
+-- 날짜는 범위조건 
+SELECT MCDP_CD AS "진료과코드", COUNT(APNT_NO) AS "5월예약건수"
+FROM APPOINTMENT
+WHERE APNT_YMD >= '2022-05-01' AND APNT_YMD < '2022-06-01'
+GROUP BY MCDP_CD
+ORDER BY "5월예약건수", "진료과코드";
+
+-- 또는 DATEFROMPARTS 또는 EOMONTH 같은 날짜 함수를 사용하는 것이 좋다.
+SELECT MCDP_CD AS "진료과코드", COUNT(APNT_NO) AS "5월예약건수"
+FROM APPOINTMENT
+WHERE APNT_YMD >= DATEFROMPARTS(2022, 5, 1) 
+  AND APNT_YMD <= EOMONTH(DATEFROMPARTS(2022, 5, 1))
+GROUP BY MCDP_CD
+ORDER BY "5월예약건수", "진료과코드";

@@ -1,19 +1,22 @@
 T, W = map(int, input().split())
 arr = []
-pos = 1
-move_cnt = 0
+dp = [[0 for _ in range(W+1)] for _ in range(T+1)]
 for i in range(T):
     arr.append(int(input()))
 
-def inv(pos):
-    return 1 if pos == 0 else 0
-
-dp = [[[0, 0] for _ in range(W)] for _ in range(T+1)]
-
 for i in range(1, T+1):
-    if arr[i-1] == pos:
-        dp[i][move_cnt][pos] = dp[i-1][move_cnt][pos] + 1
+    for j in range(W+1):
+        if j == 0:
+            dp[i][j] = dp[i-1][j] + 1 if arr[i-1] == 1 else dp[i-1][j]
 
-    else:
-        dp[i][move_cnt][pos] = dp[i-1][move_cnt][pos]
-        dp[i][move_cnt+1][inv(pos)] = dp[i-1][move_cnt][pos] + 1
+        else:
+            temp = list(zip(*dp))[j - 1]
+            if j % 2 == 1:
+                # current on tree 2
+                dp[i][j] = max(max(temp[:i]) + 1, dp[i-1][j] + (1 if arr[i-1] == 2 else 0))
+
+            else:
+                # current on tree 1
+                dp[i][j] = max(max(temp[:i]) + 1, dp[i-1][j] + (1 if arr[i-1] == 1 else 0))
+
+print(max(dp[-1]))

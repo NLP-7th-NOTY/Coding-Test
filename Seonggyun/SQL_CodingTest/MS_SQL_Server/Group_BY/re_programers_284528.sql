@@ -1,0 +1,49 @@
+SELECT 
+    HG.EMP_NO, 
+    HE.EMP_NAME, 
+    CASE 
+        WHEN SUM(SCORE)/2 >= 96 THEN 'S'
+        WHEN SUM(SCORE)/2 >= 90 THEN 'A'
+        WHEN SUM(SCORE)/2 >= 80 THEN 'B'
+        ELSE 'C'
+    END AS GRADE,
+    CASE
+        WHEN SUM(SCORE)/2 >= 96 THEN 0.2 * HE.SAL
+        WHEN SUM(SCORE)/2 >= 90 THEN 0.15 * HE.SAL
+        WHEN SUM(SCORE)/2 >= 80 THEN 0.1 * HE.SAL
+        ELSE 0
+    END AS BONUS
+FROM HR_GRADE HG
+LEFT JOIN HR_EMPLOYEES HE ON HG.EMP_NO = HE.EMP_NO
+GROUP BY HG.EMP_NO, HE.EMP_NAME
+ORDER BY 1
+
+-- 위 쿼리는 너무 비 효율적이라 ㅎㅎ 최적화 하자면 아래와 같음
+
+WITH CTE_GRADE AS (
+    SELECT 
+        HG.EMP_NO AS EMP_NO,
+        HE.EMP_NAME AS EMP_NAME, 
+        CASE 
+            WHEN SUM(SCORE)/2 >= 96 THEN 'S'
+            WHEN SUM(SCORE)/2 >= 90 THEN 'A'
+            WHEN SUM(SCORE)/2 >= 80 THEN 'B'
+            ELSE 'C'
+        END AS GRADE,
+        MAX(HE.SAL) AS SAL
+    FROM HR_GRADE HG
+    LEFT JOIN HR_EMPLOYEES HE ON HG.EMP_NO = HE.EMP_NO
+    GROUP BY HG.EMP_NO, HE.EMP_NAME
+)
+SELECT
+    EMP_NO,
+    EMP_NAME,
+    GRADE,
+    CASE
+        WHEN GRADE = 'S' THEN SAL*0.2
+        WHEN GRADE = 'A' THEN SAL*0.15
+        WHEN GRADE = 'B' THEN SAL*0.1
+        ELSE 0
+    END AS BONUS
+FROM CTE_GRADE
+ORDER BY 1

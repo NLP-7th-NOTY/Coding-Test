@@ -3,7 +3,7 @@ import sys
 def main():
     N, M = map(int, sys.stdin.readline().rstrip().split())
     num_list = [list(map(int, sys.stdin.readline().rstrip().split())) for _ in range(N)]
-    dp = [[0] * (N + 1) for _ in range(N)]
+    dp = [[0] * (N + 1) for _ in range(N + 1)]
     
     # 루프를 통해 누적 합을 미리 구해주고
     for i in range(1, N + 1):

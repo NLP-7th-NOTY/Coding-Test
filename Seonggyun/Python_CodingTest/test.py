@@ -1,45 +1,52 @@
 import sys
-from collections import defaultdict
 
-sys.setrecursionlimit(10**6)
-input = sys.stdin.readline
 
 def main():
-    n = int(input().rstrip())
-    tree = defaultdict(list)
     
-    for _ in range(n - 1):
-        parent, child, weight = map(int, input().rstrip().split())
-        tree[parent].append((child, weight))
-        tree[child].append((parent, weight))
+    n = int(sys.stdin.readline().rstrip())
     
-    def dfs(node, dist):
-        nonlocal max_distance, farthest_node  # 🔥 중요: 바깥 변수 사용
-        if dist > max_distance:
-            max_distance = dist
-            farthest_node = node
+    # 백트래킹 함수: row번째 행에 퀸을 배치하는 함수
+    def backtrack(row):
+        # 기저 조건: 모든 행에 퀸을 배치했다면 (row == n) 경우의 수 1 추가
+        if row == n:
+            nonlocal count
+            count += 1
+            return  # 해당 backtrack 함수 끝내기
         
-        for next_node, weight in tree[node]:
-            if not visited[next_node]:
-                visited[next_node] = True
-                dfs(next_node, dist + weight)
-
-    # Step 1: 루트(1)에서 가장 먼 노드 찾기
-    visited = [False] * (n + 1)
-    max_distance = 0
-    farthest_node = 0    
-
-    visited[1] = True
-    dfs(1, 0)
+        # 현재 행(row)에서 0부터 n - 1 까지 각 열(col)을 탐색함.
+        for col in range(n):
+            # 이미 해당 열(col)이나 두 대각선에 퀸이 존재한다면 건너뛰기
+            # row - col 하면 해당 지점 기준 좌측 대각선에 있는 row, col 조합의 값과 전부 일치
+            # row + col 하면 해당 지점 기준 우측 대각선에 있는 row, col 조합의 값과 전부 일치
+            if col in cols or (row - col) in diag1 or (row + col) in diag2:
+                continue  # 이 위치는 퀸을 둘 수 없으므로 다음 열로(다음 for문으로) 이동
+            
+            # 현재 위치에 퀸을 배치한다.
+            cols.add(col)       # 현재 열 사용 중
+            diag1.add(row - col)  # ↖↘ 대각선 사용중
+            diag2.add(row + col)  # ↙↗ 대각선 사용중
+            
+            # 다음 행으로 넘어가 퀸 배치를 시도
+            backtrack(row + 1)
+            
+            # backtracking: 이번 배치가 끝났으므로, 현재 행의 퀸을 제거하고 원상복구!
+            # 맨 처음 row == n 된 순간에 return 되며 해당 함수가 마쳐지고 순차적으로 이하 
+            # 회수가 시작되며 최종적으로 cols, diag1, diag2 모두 빈 set값으로 초기화 됨
+            # 그렇게 최초의 for문으로 돌아가 첫번째 행에서 열(col)이 다음 열로 넘어가고 거기에 퀸이 최초에 배치됨.
+            # 이런식으로 완전 탐색을 실시하는 것.
+            # 다만, 중간에 if 문을 통하여 일종의 가지치기를 통해 최적화 하는 것
+            cols.remove(col)  # row가 아니라 col을 제거해야함.
+            diag1.remove(row - col)
+            diag2.remove(row + col)
+        
+    count = 0  # 가능한 배치 방법의 총 개수를 저장할 변수 backtrack 함수 내에서는 nonlocal을 통해 불러옴
     
-    # Step 2: farthest_node에서 가장 먼 노드 찾기
-    visited = [False] * (n + 1)
-    max_distance = 0
-
-    visited[farthest_node] = True
-    dfs(farthest_node, 0)
+    # set을 사용하여 어떤 열과 어떤 대각선에 이미 퀸이 있는지 관리함. (행은 row 단위로 for문 통해 넘어가며 계산하므로 제외)
+    cols, diag1, diag2 = set(), set(), set()
+    backtrack(0)  # 0번째 행부터 탐색 시작
     
-    print(max_distance)
+    return print(count)
+
 
 if __name__ == "__main__":
     main()

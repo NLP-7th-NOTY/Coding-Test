@@ -1,43 +1,52 @@
 import sys
+import heapq
 
-def floyd_warshall(n, cost_graph):
 
-    # 플로이드–워셜 알고리즘 수행
-    for k in range(1, n + 1):  # 경유지
-        for i in range(1, n + 1):  # 출발 도시
-            for j in range(1, n + 1):  # 도착 도시
-                if cost_graph[i][j] > cost_graph[i][k] + cost_graph[k][j]:
-                    cost_graph[i][j] = cost_graph[i][k] + cost_graph[k][j]
+def dijkstra(start, graph, N):
+    """ 다익스트라 알고리즘을 사용하여 start 노드에서 모든 노드까지의 최단 거리 계산 """
+    INF = float('inf')
+    dist = [INF] * (N + 1)
+    dist[start] = 0
+    
+    pq = []
+    heapq.heappush(pq, (0, start))
+    
+    while pq:
+        current_dist, village = heapq.heappop(pq)
+        if current_dist > dist[village]:
+            continue
+        
+        for arrive, far in graph[village]:
+            if dist[arrive] > current_dist + far:
+                dist[arrive] = current_dist + far
+                heapq.heappush(pq, (dist[arrive], arrive))
+                
+    return dist
 
-    # 도달할 수 없는 경우 0으로 변경
-    for i in range(1, n + 1):
-        for j in range(1, n + 1):
-            if cost_graph[i][j] == float('inf'):
-                cost_graph[i][j] = 0
-
-    return cost_graph
 
 def main():
-    n = int(input())  # 도시 개수
-    m = int(input())  # 버스 개수
+    N, M, X = map(int, sys.stdin.readline().rstrip().split())
     
-    INF = float('inf')
-    cost_graph = [[INF] * (n + 1) for _ in range(n + 1)]
+    # 정방향 및 역방향 그래프 생성
+    graph = [[] for _ in range(N + 1)]
+    reverse_graph = [[] for _ in range(N + 1)]
     
-    # 자신에게서 자신으로 가는 것은 따로 예외처리해서 이렇게 0 -> 0 으로 만들어줘야 이후
-    # 연산틀리지 않게 됨.
-    for i in range(1, n + 1):
-        cost_graph[i][i] = 0
-    
-    for _ in range(m):
-        start, arrive, cost = map(int, sys.stdin.readline().rstrip().split())
-        cost_graph[start][arrive] = min(cost_graph[start][arrive], cost)
+    for _ in range(M):
+        start, arrive, far = map(int, sys.stdin.readline().rstrip().split())
+        graph[start].append((arrive, far))       # 정방향 그래프
+        reverse_graph[arrive].append((start, far))  # 역방향 그래프
 
-    result = floyd_warshall(n, cost_graph)
+    # 정방향 다익스트라 (각 학생 → X)
+    to_X_distances = dijkstra(X, reverse_graph, N)
+    
+    # 역방향 다익스트라 (X → 각 학생)
+    from_X_distances = dijkstra(X, graph, N)
+    
+    # 각 학생의 왕복 최단 거리 계산 후 최댓값 찾기
+    max_time = max(to_X_distances[i] + from_X_distances[i] for i in range(1, N + 1))
+    
+    print(max_time)
 
-    # 결과 출력
-    for i in range(1, n + 1):
-        print(" ".join(map(str, result[i][1:])))
 
 if __name__ == "__main__":
     main()

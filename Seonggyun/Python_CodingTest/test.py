@@ -24,6 +24,7 @@ def dijkstra(start, graph, N):
     return dist
 
 
+<<<<<<< Updated upstream
 def main():
     N, M, X = map(int, sys.stdin.readline().rstrip().split())
     
@@ -46,7 +47,41 @@ def main():
     max_time = max(to_X_distances[i] + from_X_distances[i] for i in range(1, N + 1))
     
     print(max_time)
+=======
+def cost_list(cost_graph, n, INF):
+    for i in range(1, n + 1):  # 경유지
+        for j in range(1, n + 1):  # 출발지
+            for k in range(1, n + 1):  # 도착점
+                if cost_graph[j][k] > cost_graph[j][i] + cost_graph[i][k]:
+                    cost_graph[j][k] = cost_graph[j][i] + cost_graph[i][k]
+>>>>>>> Stashed changes
 
+    for i in range(1, n + 1):
+        for j in range(1, n + 1):
+            if cost_graph[i][j] == INF:
+                cost_graph[i][j] = 0
+
+    return cost_graph
+
+
+def main():
+    n = int(input())
+    m = int(input())
+    INF = float('inf')
+
+    cost_graph = [[INF]* (n + 1) for _ in range(n + 1)]
+
+    for _ in range(m):
+        start, arrive, cost = map(int, sys.stdin.readline().rstrip().split())
+        cost_graph[start][arrive] = min(cost_graph[start][arrive], cost)
+
+
+    answers = cost_list(cost_graph, n, INF)
+
+
+    for answer in answers[1:]:
+        print(' '.join(map(str, answer[1:])))
+        
 
 if __name__ == "__main__":
     main()
